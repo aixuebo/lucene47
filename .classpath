@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/java"/>
+	<classpathentry kind="src" path="src/lucenetestframework"/>
+	<classpathentry kind="src" path="src/resources"/>
+	<classpathentry kind="src" path="src/test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry exported="true" kind="lib" path="lib/ant-1.8.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/junit-4.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/junit4-ant-2.0.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/randomizedtesting-runner-2.0.13.jar" sourcepath="C:/Users/Administrator/.m2/repository/com/carrotsearch/randomizedtesting/randomizedtesting-runner/2.0.13/randomizedtesting-runner-2.0.13-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-analyzers-common-4.7.0.jar" sourcepath="C:/Users/Administrator/.m2/repository/org/apache/lucene/lucene-analyzers-common/4.7.0/lucene-analyzers-common-4.7.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-codecs-4.7.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lucene-test-framework-4.7.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
