@@ -28,6 +28,7 @@ import org.apache.lucene.util.Attribute;
  * The flags can be used to encode information about the token for use by other 
  * {@link org.apache.lucene.analysis.TokenFilter}s.
  * @lucene.experimental While we think this is here to stay, we may want to change it to be a long.
+ * 为一个token提供一个int的标识符
  */
 public interface FlagsAttribute extends Attribute {
   /**

@@ -356,6 +356,7 @@ final class DocumentsWriterFlushControl  {
       fullFlush = this.fullFlush;
       numPending = this.numPending;
     }
+    
     if (numPending > 0 && !fullFlush) { // don't check if we are doing a full flush
       final int limit = perThreadPool.getActiveThreadState();
       for (int i = 0; i < limit && numPending > 0; i++) {

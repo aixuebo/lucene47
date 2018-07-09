@@ -25,12 +25,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * InfoStream implementation over a {@link PrintStream}
  * such as <code>System.out</code>.
- * 
+ * 控制台输出内容
  * @lucene.internal
  */
 public class PrintStreamInfoStream extends InfoStream {
   // Used for printing messages
-  private static final AtomicInteger MESSAGE_ID = new AtomicInteger();
+  private static final AtomicInteger MESSAGE_ID = new AtomicInteger();//全局计数器
   protected final int messageID;
   
   protected final PrintStream stream;

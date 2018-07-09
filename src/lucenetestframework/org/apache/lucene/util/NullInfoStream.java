@@ -23,6 +23,7 @@ import java.io.IOException;
  * Prints nothing. Just to make sure tests pass w/ and without enabled InfoStream
  * without actually making noise.
  * @lucene.experimental
+ * 什么都不打印
  */
 public class NullInfoStream extends InfoStream {
 

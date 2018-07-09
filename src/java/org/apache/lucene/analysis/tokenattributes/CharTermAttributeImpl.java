@@ -30,12 +30,13 @@ import org.apache.lucene.util.UnicodeUtil;
 public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttribute, TermToBytesRefAttribute, Cloneable {
   private static int MIN_BUFFER_SIZE = 10;
   
-  private char[] termBuffer = new char[ArrayUtil.oversize(MIN_BUFFER_SIZE, RamUsageEstimator.NUM_BYTES_CHAR)];
-  private int termLength = 0;
+  private char[] termBuffer = new char[ArrayUtil.oversize(MIN_BUFFER_SIZE, RamUsageEstimator.NUM_BYTES_CHAR)];//缓冲区间
+  private int termLength = 0;//缓冲区间的开始位置
   
   /** Initialize this attribute with empty term text */
   public CharTermAttributeImpl() {}
 
+  //将参数buffer的指定内容copy到内部的termBuffer中
   @Override
   public final void copyBuffer(char[] buffer, int offset, int length) {
     growTermBuffer(length);
@@ -60,6 +61,7 @@ public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttr
     return termBuffer;   
   }
   
+  //扩容
   private void growTermBuffer(int newSize) {
     if(termBuffer.length < newSize){
       // Not big enough; create a new array with slight
@@ -68,6 +70,7 @@ public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttr
     }
   }
 
+  //截断buffer的内容,只到length结束
   @Override
   public final CharTermAttribute setLength(int length) {
     if (length > termBuffer.length)
@@ -76,6 +79,7 @@ public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttr
     return this;
   }
   
+  //设置内容为空,其实就是移动指针即可
   @Override
   public final CharTermAttribute setEmpty() {
     termLength = 0;
@@ -101,6 +105,7 @@ public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttr
     return termLength;
   }
   
+  //获取一个字符
   @Override
   public final char charAt(int index) {
     if (index >= termLength)
@@ -108,6 +113,7 @@ public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttr
     return termBuffer[index];
   }
   
+  //获取子字符串
   @Override
   public final CharSequence subSequence(final int start, final int end) {
     if (start > termLength || end > termLength)
@@ -116,7 +122,7 @@ public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttr
   }
   
   // *** Appendable interface ***
-
+  //追加一个字符串
   @Override
   public final CharTermAttribute append(CharSequence csq) {
     if (csq == null) // needed for Appendable compliance
@@ -124,6 +130,7 @@ public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttr
     return append(csq, 0, csq.length());
   }
   
+  //将csq的start-end之间的字节,追加到termBuffer中
   @Override
   public final CharTermAttribute append(CharSequence csq, int start, int end) {
     if (csq == null) // needed for Appendable compliance
@@ -136,7 +143,7 @@ public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttr
     resizeBuffer(termLength + len);
     if (len > 4) { // only use instanceof check series for longer CSQs, else simply iterate
       if (csq instanceof String) {
-        ((String) csq).getChars(start, end, termBuffer, termLength);
+        ((String) csq).getChars(start, end, termBuffer, termLength);//将csq的start-end之间的字符串,添加到termBuffer中，从termBuffer的termLength位置开始添加
       } else if (csq instanceof StringBuilder) {
         ((StringBuilder) csq).getChars(start, end, termBuffer, termLength);
       } else if (csq instanceof CharTermAttribute) {
@@ -161,6 +168,7 @@ public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttr
     }
   }
   
+  //追加一个字节
   @Override
   public final CharTermAttribute append(char c) {
     resizeBuffer(termLength + 1)[termLength++] = c;
@@ -199,6 +207,7 @@ public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttr
     return this;
   }
 
+  //追加null字符串
   private CharTermAttribute appendNull() {
     resizeBuffer(termLength + 4);
     termBuffer[termLength++] = 'n';

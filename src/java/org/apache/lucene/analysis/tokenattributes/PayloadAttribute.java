@@ -34,6 +34,7 @@ import org.apache.lucene.util.BytesRef;
  * may optimize payload storage when all payloads have the same length.
  * 
  * @see DocsAndPositionsEnum
+ * 为一个token提供额外的信息--该额外信息是一个字节数组组成的,因此理论上写入什么都可以,包括备注属性，而且什么格式都可以,比如json
  */
 public interface PayloadAttribute extends Attribute {
   /**

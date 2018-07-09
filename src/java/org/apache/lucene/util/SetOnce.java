@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * and retrieve it many times. If {@link #set(Object)} is called more than once,
  * {@link AlreadySetException} is thrown and the operation
  * will fail.
+ * 该对象里面的obj对象只能被实例化一次
  *
  * @lucene.experimental
  */
@@ -37,8 +38,8 @@ public final class SetOnce<T> implements Cloneable {
     }
   }
   
-  private volatile T obj = null;
-  private final AtomicBoolean set;
+  private volatile T obj = null;//实例化对象
+  private final AtomicBoolean set;//true表示已经obj被实例化了
   
   /**
    * A default constructor which does not set the internal object, and allows
@@ -58,7 +59,7 @@ public final class SetOnce<T> implements Cloneable {
    */
   public SetOnce(T obj) {
     this.obj = obj;
-    set = new AtomicBoolean(true);
+    set = new AtomicBoolean(true);//说明实例化了,因此要设置为true
   }
   
   /** Sets the given object. If the object has already been set, an exception is thrown. */
@@ -66,11 +67,13 @@ public final class SetOnce<T> implements Cloneable {
     if (set.compareAndSet(false, true)) {
       this.obj = obj;
     } else {
-      throw new AlreadySetException();
+      throw new AlreadySetException();//说明已经被实例化了,因此抛异常
     }
   }
   
-  /** Returns the object set by {@link #set(Object)}. */
+  /** Returns the object set by {@link #set(Object)}. 
+   * 获取实例化对象 
+   **/
   public final T get() {
     return obj;
   }

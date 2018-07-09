@@ -33,6 +33,8 @@ import org.apache.lucene.index.FieldInfo.IndexOptions;
  *  @lucene.experimental
  */
 public class FieldInfos implements Iterable<FieldInfo> {
+	
+	//所有的field中只要有一个field有配置,则该返回值都是true,默认是false
   private final boolean hasFreq;
   private final boolean hasProx;
   private final boolean hasPayloads;
@@ -41,9 +43,10 @@ public class FieldInfos implements Iterable<FieldInfo> {
   private final boolean hasNorms;
   private final boolean hasDocValues;
   
+  //按照序号 以及 name 映射field属性
   private final SortedMap<Integer,FieldInfo> byNumber = new TreeMap<Integer,FieldInfo>();
   private final HashMap<String,FieldInfo> byName = new HashMap<String,FieldInfo>();
-  private final Collection<FieldInfo> values; // for an unmodifiable iterator
+  private final Collection<FieldInfo> values; // for an unmodifiable iterator,FieldInfo集合,即不需要按照name或者number分组的集合
   
   /**
    * Constructs a new FieldInfos from an array of FieldInfo objects
@@ -59,11 +62,11 @@ public class FieldInfos implements Iterable<FieldInfo> {
     
     for (FieldInfo info : infos) {
       FieldInfo previous = byNumber.put(info.number, info);
-      if (previous != null) {
+      if (previous != null) {//说明该number以前存在内如,这个很明显是不对的,不会发生的
         throw new IllegalArgumentException("duplicate field numbers: " + previous.name + " and " + info.name + " have: " + info.number);
       }
       previous = byName.put(info.name, info);
-      if (previous != null) {
+      if (previous != null) {//说明该name以前存在内如,这个很明显是不对的,不会发生的
         throw new IllegalArgumentException("duplicate field names: " + previous.number + " and " + info.number + " have: " + info.name);
       }
       
@@ -121,7 +124,9 @@ public class FieldInfos implements Iterable<FieldInfo> {
     return hasDocValues;
   }
   
-  /** Returns the number of fields */
+  /** Returns the number of fields 
+   * 返回多少个field
+   **/
   public int size() {
     assert byNumber.size() == byName.size();
     return byNumber.size();
@@ -159,7 +164,7 @@ public class FieldInfos implements Iterable<FieldInfo> {
     return (fieldNumber >= 0) ? byNumber.get(fieldNumber) : null;
   }
   
-  static final class FieldNumbers {
+  static final class FieldNumbers {//因为是static,因此全局项目一旦启动后,所有的索引的属性都要有一个唯一的id
     
     private final Map<Integer,String> numberToName;
     private final Map<String,Integer> nameToNumber;
@@ -171,7 +176,7 @@ public class FieldInfos implements Iterable<FieldInfo> {
     // TODO: we should similarly catch an attempt to turn
     // norms back on after they were already ommitted; today
     // we silently discard the norm but this is badly trappy
-    private int lowestUnassignedFieldNumber = -1;
+    private int lowestUnassignedFieldNumber = -1;//全局的唯一的id,依次累加的
     
     FieldNumbers() {
       this.nameToNumber = new HashMap<String, Integer>();
@@ -184,24 +189,27 @@ public class FieldInfos implements Iterable<FieldInfo> {
      * does not exist yet it tries to add it with the given preferred field
      * number assigned if possible otherwise the first unassigned field number
      * is used as the field number.
+     * 返回唯一的属性id
+     * 
+     * 参数preferredFieldNumber,参考的属性全局唯一id
      */
     synchronized int addOrGet(String fieldName, int preferredFieldNumber, DocValuesType dvType) {
       if (dvType != null) {
         DocValuesType currentDVType = docValuesType.get(fieldName);
         if (currentDVType == null) {
           docValuesType.put(fieldName, dvType);
-        } else if (currentDVType != null && currentDVType != dvType) {
+        } else if (currentDVType != null && currentDVType != dvType) {//不允许更改排序类型
           throw new IllegalArgumentException("cannot change DocValues type from " + currentDVType + " to " + dvType + " for field \"" + fieldName + "\"");
         }
       }
       Integer fieldNumber = nameToNumber.get(fieldName);
       if (fieldNumber == null) {
-        final Integer preferredBoxed = Integer.valueOf(preferredFieldNumber);
+        final Integer preferredBoxed = Integer.valueOf(preferredFieldNumber);//自己预先设定理想的id
 
-        if (preferredFieldNumber != -1 && !numberToName.containsKey(preferredBoxed)) {
+        if (preferredFieldNumber != -1 && !numberToName.containsKey(preferredBoxed)) {//说明该id不存在,因此可以使用
           // cool - we can use this number globally
           fieldNumber = preferredBoxed;
-        } else {
+        } else {//预先设定的id不可以,因此要自己创建一个唯一的id
           // find a new FieldNumber
           while (numberToName.containsKey(++lowestUnassignedFieldNumber)) {
             // might not be up to date - lets do the work once needed
@@ -297,7 +305,7 @@ public class FieldInfos implements Iterable<FieldInfo> {
         // number for this field.  If the field was seen
         // before then we'll get the same name and number,
         // else we'll allocate a new one:
-        final int fieldNumber = globalFieldNumbers.addOrGet(name, preferredFieldNumber, docValues);
+        final int fieldNumber = globalFieldNumbers.addOrGet(name, preferredFieldNumber, docValues);//获取一个唯一的号码
         fi = new FieldInfo(name, isIndexed, fieldNumber, storeTermVector, omitNorms, storePayloads, indexOptions, docValues, normType, null);
         assert !byName.containsKey(fi.name);
         assert globalFieldNumbers.containsConsistent(Integer.valueOf(fi.number), fi.name, fi.getDocValuesType());

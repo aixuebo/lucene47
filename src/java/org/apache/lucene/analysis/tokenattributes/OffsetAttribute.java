@@ -21,6 +21,7 @@ import org.apache.lucene.util.Attribute;
 
 /**
  * The start and end character offset of a Token. 
+ * 一个token的开始和结束位置
  */
 public interface OffsetAttribute extends Attribute {
   /** 
@@ -42,6 +43,7 @@ public interface OffsetAttribute extends Attribute {
    *         <code>endOffset</code>
    * @see #startOffset()
    * @see #endOffset()
+   * 设置开始位置和最终位置,用于其他两个方法进行get获取
    */
   public void setOffset(int startOffset, int endOffset);
   

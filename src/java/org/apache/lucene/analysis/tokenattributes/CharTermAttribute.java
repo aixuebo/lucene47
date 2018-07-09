@@ -21,6 +21,7 @@ import org.apache.lucene.util.Attribute;
 
 /**
  * The term text of a Token.
+ * 解析一个token
  */
 public interface CharTermAttribute extends Attribute, CharSequence, Appendable {
   

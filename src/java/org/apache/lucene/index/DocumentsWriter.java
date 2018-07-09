@@ -125,7 +125,7 @@ final class DocumentsWriter {
   final FlushPolicy flushPolicy;
   final DocumentsWriterFlushControl flushControl;
   private final IndexWriter writer;
-  private final Queue<Event> events;
+  private final Queue<Event> events;//事件队列
 
   
   DocumentsWriter(IndexWriter writer, LiveIndexWriterConfig config, Directory directory) {
@@ -395,6 +395,7 @@ final class DocumentsWriter {
     }
   }
 
+  //写入一组document集合
   boolean updateDocuments(final Iterable<? extends Iterable<? extends IndexableField>> docs, final Analyzer analyzer,
                           final Term delTerm) throws IOException {
     boolean hasEvents = preUpdate();
@@ -432,6 +433,7 @@ final class DocumentsWriter {
     return postUpdate(flushingDWPT, hasEvents);
   }
 
+  //写入一个document
   boolean updateDocument(final Iterable<? extends IndexableField> doc, final Analyzer analyzer,
       final Term delTerm) throws IOException {
 
@@ -656,6 +658,7 @@ final class DocumentsWriter {
     return config;
   }
   
+  //添加事件到队列
   private void putEvent(Event event) {
     events.add(event);
   }
@@ -702,6 +705,7 @@ final class DocumentsWriter {
     }
   }
   
+  //失败事件
   static class FlushFailedEvent implements Event {
     private final SegmentInfo info;
     
@@ -715,6 +719,7 @@ final class DocumentsWriter {
     }
   }
   
+  //一个事件,用于表示要删除一些文档集合
   static class DeleteNewFilesEvent implements Event {
     private final Collection<String>  files;
     
@@ -728,6 +733,7 @@ final class DocumentsWriter {
     }
   }
 
+  //事件集合
   public Queue<Event> eventQueue() {
     return events;
   }

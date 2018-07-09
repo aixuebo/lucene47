@@ -131,8 +131,9 @@ final class DocFieldProcessor extends DocConsumer {
     }
   }
 
+  //获取所有的属性集合
   public Collection<DocFieldConsumerPerField> fields() {
-    Collection<DocFieldConsumerPerField> fields = new HashSet<DocFieldConsumerPerField>();
+    Collection<DocFieldConsumerPerField> fields = new HashSet<DocFieldConsumerPerField>();//所有的属性集合
     for(int i=0;i<fieldHash.length;i++) {
       DocFieldProcessorPerField field = fieldHash[i];
       while(field != null) {
@@ -153,12 +154,12 @@ final class DocFieldProcessor extends DocConsumer {
     // Rehash
     int newHashMask = newHashSize-1;
     for(int j=0;j<fieldHash.length;j++) {
-      DocFieldProcessorPerField fp0 = fieldHash[j];
+      DocFieldProcessorPerField fp0 = fieldHash[j];//已经存在的属性
       while(fp0 != null) {
-        final int hashPos2 = fp0.fieldInfo.name.hashCode() & newHashMask;
+        final int hashPos2 = fp0.fieldInfo.name.hashCode() & newHashMask;//已经存在的属性name在新的里面的index位置
         DocFieldProcessorPerField nextFP0 = fp0.next;
         fp0.next = newHashArray[hashPos2];
-        newHashArray[hashPos2] = fp0;
+        newHashArray[hashPos2] = fp0;//老的元素存储在新的位置上
         fp0 = nextFP0;
       }
     }
@@ -182,17 +183,17 @@ final class DocFieldProcessor extends DocConsumer {
     // seen before (eg suddenly turning on norms or
     // vectors, etc.):
 
-    for(IndexableField field : docState.doc) {
+    for(IndexableField field : docState.doc) {//循环该doc的所有属性
       final String fieldName = field.name();
 
       // Make sure we have a PerField allocated
       final int hashPos = fieldName.hashCode() & hashMask;
       DocFieldProcessorPerField fp = fieldHash[hashPos];
-      while(fp != null && !fp.fieldInfo.name.equals(fieldName)) {
+      while(fp != null && !fp.fieldInfo.name.equals(fieldName)) {//同一个hash的位置可能是多个属性的name冲突了
         fp = fp.next;
       }
 
-      if (fp == null) {
+      if (fp == null) {//说明没有改field的name,即第一次出现
 
         // TODO FI: we need to genericize the "flags" that a
         // field holds, and, how these flags are merged; it
@@ -201,9 +202,9 @@ final class DocFieldProcessor extends DocConsumer {
         // easily add it
         FieldInfo fi = fieldInfos.addOrUpdate(fieldName, field.fieldType());
 
-        fp = new DocFieldProcessorPerField(this, fi);
-        fp.next = fieldHash[hashPos];
-        fieldHash[hashPos] = fp;
+        fp = new DocFieldProcessorPerField(this, fi);//新创建一个field对象
+        fp.next = fieldHash[hashPos];//新创建的作为队列的头,next指向以前创建的
+        fieldHash[hashPos] = fp;//目前该hash位置对应的属性,就是新创建的属性
         totalFieldCount++;
 
         if (totalFieldCount >= fieldHash.length/2) {

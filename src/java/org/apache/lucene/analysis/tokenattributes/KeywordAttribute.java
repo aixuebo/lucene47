@@ -26,6 +26,7 @@ import org.apache.lucene.util.Attribute;
  * of {@link #isKeyword()} if the token is modified. Stemming filters for
  * instance can use this attribute to conditionally skip a term if
  * {@link #isKeyword()} returns <code>true</code>.
+ * 判断该token是否是关键字
  */
 public interface KeywordAttribute extends Attribute {
 

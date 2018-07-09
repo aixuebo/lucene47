@@ -32,12 +32,13 @@ import java.io.Closeable;
  */
 public abstract class InfoStream implements Closeable, Cloneable {
 
-  /** Instance of InfoStream that does no logging at all. */
+  /** Instance of InfoStream that does no logging at all. 根本不会打印日志*/
   public static final InfoStream NO_OUTPUT = new NoOutput();
   private static final class NoOutput extends InfoStream {
     @Override
     public void message(String component, String message) {
       assert false: "message() should not be called when isEnabled returns false";
+    //说明该方法不应该被调用
     }
     
     @Override
@@ -49,13 +50,17 @@ public abstract class InfoStream implements Closeable, Cloneable {
     public void close() {}
   }
   
-  /** prints a message */
+  /** prints a message 
+   * 记录打印的日志内容 
+   **/
   public abstract void message(String component, String message);
   
-  /** returns true if messages are enabled and should be posted to {@link #message}. */
+  /** returns true if messages are enabled and should be posted to {@link #message}. 
+   * 参数的组件是否可以打印日志 
+   **/
   public abstract boolean isEnabled(String component);
   
-  private static InfoStream defaultInfoStream = NO_OUTPUT;
+  private static InfoStream defaultInfoStream = NO_OUTPUT;//默认日志系统
   
   /** The default {@code InfoStream} used by a newly instantiated classes.
    * @see #setDefault */

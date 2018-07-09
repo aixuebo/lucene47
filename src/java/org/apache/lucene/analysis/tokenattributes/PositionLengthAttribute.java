@@ -25,7 +25,7 @@ import org.apache.lucene.util.Attribute;
  *  it's useful to express the graph structure naturally
  *  produced by decompounding, word splitting/joining,
  *  synonym filtering, etc.
- *
+ * 决定该token占用了多少个词,理论上一个词语是一个token
  * <p>NOTE: this is optional, and most analyzers
  *  don't change the default value (1). */
 
@@ -39,6 +39,7 @@ public interface PositionLengthAttribute extends Attribute {
    * @throws IllegalArgumentException if <code>positionLength</code> 
    *         is zero or negative.
    * @see #getPositionLength()
+   * 设置token占用的词数
    */
   public void setPositionLength(int positionLength);
 

@@ -19,6 +19,7 @@ package org.apache.lucene.util;
 
 /**
  * Base interface for attributes.
+ * 为token分词提供更多的属性信息,比如偏移量、是否是关键字等信息
  */
 public interface Attribute {
 }
