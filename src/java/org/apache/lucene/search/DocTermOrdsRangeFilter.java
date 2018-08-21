@@ -33,9 +33,9 @@ import org.apache.lucene.util.BytesRef;
 
 public abstract class DocTermOrdsRangeFilter extends Filter {
   final String field;
-  final BytesRef lowerVal;
+  final BytesRef lowerVal;//最低值
   final BytesRef upperVal;
-  final boolean includeLower;
+  final boolean includeLower;//是否包含最低值
   final boolean includeUpper;
   
   private DocTermOrdsRangeFilter(String field, BytesRef lowerVal, BytesRef upperVal, boolean includeLower, boolean includeUpper) {
@@ -87,7 +87,7 @@ public abstract class DocTermOrdsRangeFilter extends Filter {
           inclusiveUpperPoint = upperPoint - 1;
         } else {
           inclusiveUpperPoint = -upperPoint - 2;
-        }      
+        }
 
         if (inclusiveUpperPoint < 0 || inclusiveLowerPoint > inclusiveUpperPoint) {
           return null;

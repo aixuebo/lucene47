@@ -47,7 +47,9 @@ public final class ByteBlockPool {
   public final static int BYTE_BLOCK_MASK = BYTE_BLOCK_SIZE - 1;//用于计算取余数
 
   /** Abstract class for allocating and freeing byte
-   *  blocks. */
+   *  blocks. 
+   * 分配和释放字节数组 
+   **/
   public abstract static class Allocator {
     protected final int blockSize;
 
@@ -67,7 +69,7 @@ public final class ByteBlockPool {
     }
   }
   
-  /** A simple {@link Allocator} that never recycles. */
+  /** A simple {@link Allocator} that never recycles.直接使用内存,不需要回收 */
   public static final class DirectAllocator extends Allocator {
     
     public DirectAllocator() {
@@ -86,7 +88,7 @@ public final class ByteBlockPool {
   /** A simple {@link Allocator} that never recycles, but
    *  tracks how much total RAM is in use. */
   public static class DirectTrackingAllocator extends Allocator {
-    private final Counter bytesUsed;
+    private final Counter bytesUsed;//已经使用多少字节
     
     public DirectTrackingAllocator(Counter bytesUsed) {
       this(BYTE_BLOCK_SIZE, bytesUsed);
@@ -97,15 +99,17 @@ public final class ByteBlockPool {
       this.bytesUsed = bytesUsed;
     }
 
+    //返回一个数据块
     @Override
     public byte[] getByteBlock() {
       bytesUsed.addAndGet(blockSize);
       return new byte[blockSize];
     }
 
+    //还原若干个数据块
     @Override
     public void recycleByteBlocks(byte[][] blocks, int start, int end) {
-      bytesUsed.addAndGet(-((end-start)* blockSize));
+      bytesUsed.addAndGet(-((end-start)* blockSize));//减少若干个数据块占用的空间
       for (int i = start; i < end; i++) {
         blocks[i] = null;
       }

@@ -67,6 +67,11 @@ final class TermVectorsConsumerPerField extends TermsHashConsumerPerField {
 
     for(int i=0;i<count;i++) {
       IndexableField field = fields[i];
+      /**
+       * 如果一个field可以被index,因此分词后的token可以被存储分词本身(doVectors)、分词的offset(doVectorOffsets)、分词的position(doVectorPositions)、分词的payLoad(doVectorPayloads)
+       * 如果一个field不能被索引,上面四个都不能被存储
+       * 只有分词的position存在的时候,分词的payLoad才能有信息,比如存储同义词等内容
+       */
       if (field.fieldType().indexed()) {
         if (field.fieldType().storeTermVectors()) {
           doVectors = true;
@@ -210,7 +215,7 @@ final class TermVectorsConsumerPerField extends TermsHashConsumerPerField {
     }
   }
   
-  void writeProx(TermVectorsPostingsArray postings, int termID) {    
+  void writeProx(TermVectorsPostingsArray postings, int termID) {
     if (doVectorOffsets) {
       int startOffset = fieldState.offset + offsetAttribute.startOffset();
       int endOffset = fieldState.offset + offsetAttribute.endOffset();

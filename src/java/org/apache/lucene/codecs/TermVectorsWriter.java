@@ -69,30 +69,44 @@ public abstract class TermVectorsWriter implements Closeable {
    *  be called <code>numVectorFields</code> times. Note that if term 
    *  vectors are enabled, this is called even if the document 
    *  has no vector fields, in this case <code>numVectorFields</code> 
-   *  will be zero. */
+   *  will be zero. 
+   * 开始写入一个文档,参数是该文档有多少个属性  
+   **/
   public abstract void startDocument(int numVectorFields) throws IOException;
 
-  /** Called after a doc and all its fields have been added. */
+  /** Called after a doc and all its fields have been added. 
+   * 当一个document的所有的field被写入完成后调用该函数 
+   **/
   public void finishDocument() throws IOException {};
 
   /** Called before writing the terms of the field.
-   *  {@link #startTerm(BytesRef, int)} will be called <code>numTerms</code> times. */
+   *  {@link #startTerm(BytesRef, int)} will be called <code>numTerms</code> times.
+   * 有多少个属性,就要调用该方法多少次
+   * 每一次传入制定的属性、该属性有多少个词、是否存储 词的位置、offset、位置的备注  
+   **/
   public abstract void startField(FieldInfo info, int numTerms, boolean positions, boolean offsets, boolean payloads) throws IOException;
 
-  /** Called after a field and all its terms have been added. */
+  /** Called after a field and all its terms have been added.
+   * 表示一个field完成了 
+   **/
   public void finishField() throws IOException {};
 
   /** Adds a term and its term frequency <code>freq</code>.
    * If this field has positions and/or offsets enabled, then
    * {@link #addPosition(int, int, int, BytesRef)} will be called 
    * <code>freq</code> times respectively.
+   * 表示一个词开始了，描述该次 以及 词频，以及调用词频次数的addPosition方法
    */
   public abstract void startTerm(BytesRef term, int freq) throws IOException;
 
-  /** Called after a term and all its positions have been added. */
+  /** Called after a term and all its positions have been added. 
+   * 完成添加了一个词语 
+   **/
   public void finishTerm() throws IOException {}
 
-  /** Adds a term position and offsets */
+  /** Adds a term position and offsets 
+   * 为某一个词添加位置信息 
+   **/
   public abstract void addPosition(int position, int startOffset, int endOffset, BytesRef payload) throws IOException;
   
   /** Aborts writing entirely, implementation should remove
@@ -122,6 +136,7 @@ public abstract class TermVectorsWriter implements Closeable {
    */
   // TODO: we should probably nuke this and make a more efficient 4.x format
   // PreFlex-RW could then be slow and buffer (its only used in tests...)
+  //第一个参数表示一个词出现了多少次,第二个参数存储了该词出现的位置以及备注,第三个词语存储了该词的offset和end
   public void addProx(int numProx, DataInput positions, DataInput offsets) throws IOException {
     int position = 0;
     int lastOffset = 0;
@@ -146,10 +161,10 @@ public abstract class TermVectorsWriter implements Closeable {
             payload = new BytesRef();
             payload.bytes = new byte[payloadLength];
           } else if (payload.bytes.length < payloadLength) {
-            payload.grow(payloadLength);
+            payload.grow(payloadLength);//扩容
           }
 
-          positions.readBytes(payload.bytes, 0, payloadLength);
+          positions.readBytes(payload.bytes, 0, payloadLength);//从positions中读取字节到payload.bytes中
           payload.length = payloadLength;
           thisPayload = payload;
         } else {

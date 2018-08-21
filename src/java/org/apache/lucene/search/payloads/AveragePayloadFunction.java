@@ -22,6 +22,7 @@ package org.apache.lucene.search.payloads;
  * Calculate the final score as the average score of all payloads seen.
  * <p/>
  * Is thread safe and completely reusable. 
+ * 该线程是安全的,可以重复使用
  *
  **/
 public class AveragePayloadFunction extends PayloadFunction{

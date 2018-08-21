@@ -28,9 +28,9 @@ abstract class DocFieldConsumer {
   /** Called when an aborting exception is hit */
   abstract void abort();
 
-  abstract void startDocument() throws IOException;
+  abstract void startDocument() throws IOException;//最后调用一次
 
   abstract DocFieldConsumerPerField addField(FieldInfo fi);
 
-  abstract void finishDocument() throws IOException;
+  abstract void finishDocument() throws IOException;//最后调用一次
 }

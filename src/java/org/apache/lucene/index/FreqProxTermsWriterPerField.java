@@ -65,6 +65,7 @@ final class FreqProxTermsWriterPerField extends TermsHashConsumerPerField implem
       return 2;
     }
   }
+  
 
   @Override
   void finish() {
@@ -78,6 +79,7 @@ final class FreqProxTermsWriterPerField extends TermsHashConsumerPerField implem
   @Override
   void skippingLongTerm() {}
 
+  //按照field的Name排序
   @Override
   public int compareTo(FreqProxTermsWriterPerField other) {
     return fieldInfo.name.compareTo(other.fieldInfo.name);

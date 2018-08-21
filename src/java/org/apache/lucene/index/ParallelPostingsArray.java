@@ -21,7 +21,7 @@ import org.apache.lucene.util.ArrayUtil;
 import org.apache.lucene.util.RamUsageEstimator;
 
 class ParallelPostingsArray {
-  final static int BYTES_PER_POSTING = 3 * RamUsageEstimator.NUM_BYTES_INT;
+  final static int BYTES_PER_POSTING = 3 * RamUsageEstimator.NUM_BYTES_INT;//每一个占用3个int,即3*4=12个字节,分别存储三个int属性值
 
   final int size;
   final int[] textStarts;
@@ -50,6 +50,7 @@ class ParallelPostingsArray {
     return newArray;
   }
 
+  //将内容copy到参数对应的对象中
   void copyTo(ParallelPostingsArray toArray, int numToCopy) {
     System.arraycopy(textStarts, 0, toArray.textStarts, 0, numToCopy);
     System.arraycopy(intStarts, 0, toArray.intStarts, 0, numToCopy);

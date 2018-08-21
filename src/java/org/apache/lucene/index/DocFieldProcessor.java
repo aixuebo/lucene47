@@ -44,14 +44,14 @@ final class DocFieldProcessor extends DocConsumer {
   final StoredFieldsConsumer storedConsumer;
   final Codec codec;
 
-  // Holds all fields seen in current doc
+  // Holds all fields seen in current doc 当前doc下的所有field
   DocFieldProcessorPerField[] fields = new DocFieldProcessorPerField[1];
   int fieldCount;
 
-  // Hash table for all fields ever seen
+  // Hash table for all fields ever seen 存储该segment下所有出现的field集合
   DocFieldProcessorPerField[] fieldHash = new DocFieldProcessorPerField[2];
   int hashMask = 1;
-  int totalFieldCount;
+  int totalFieldCount;//总field数量
 
   int fieldGen;
   final DocumentsWriterPerThread.DocState docState;
@@ -176,12 +176,12 @@ final class DocFieldProcessor extends DocConsumer {
 
     fieldCount = 0;
 
-    final int thisFieldGen = fieldGen++;
+    final int thisFieldGen = fieldGen++;//说明处理了多少个doc,每个新来的doc都会更新该值
 
-    // Absorb any new fields first seen in this document.
+    // Absorb any new fields first seen in this document.吸收任何第一次出现的field域
     // Also absorb any changes to fields we had already
     // seen before (eg suddenly turning on norms or
-    // vectors, etc.):
+    // vectors, etc.):也吸收任何修改的field域
 
     for(IndexableField field : docState.doc) {//循环该doc的所有属性
       final String fieldName = field.name();
@@ -200,7 +200,7 @@ final class DocFieldProcessor extends DocConsumer {
         // needs to be more "pluggable" such that if I want
         // to have a new "thing" my Fields can do, I can
         // easily add it
-        FieldInfo fi = fieldInfos.addOrUpdate(fieldName, field.fieldType());
+        FieldInfo fi = fieldInfos.addOrUpdate(fieldName, field.fieldType());//添加一个field
 
         fp = new DocFieldProcessorPerField(this, fi);//新创建一个field对象
         fp.next = fieldHash[hashPos];//新创建的作为队列的头,next指向以前创建的
@@ -217,19 +217,19 @@ final class DocFieldProcessor extends DocConsumer {
         assert fi == fp.fieldInfo : "should only have updated an existing FieldInfo instance";
       }
 
-      if (thisFieldGen != fp.lastGen) {
+      if (thisFieldGen != fp.lastGen) {//切换新的doc
 
         // First time we're seeing this field for this doc
         fp.fieldCount = 0;
 
-        if (fieldCount == fields.length) {
+        if (fieldCount == fields.length) {//扩容
           final int newSize = fields.length*2;
           DocFieldProcessorPerField newArray[] = new DocFieldProcessorPerField[newSize];
           System.arraycopy(fields, 0, newArray, 0, fieldCount);
           fields = newArray;
         }
 
-        fields[fieldCount++] = fp;
+        fields[fieldCount++] = fp;//该doc下有多少个field
         fp.lastGen = thisFieldGen;
       }
 
@@ -243,7 +243,7 @@ final class DocFieldProcessor extends DocConsumer {
     // sort the subset of fields that have vectors
     // enabled; we could save [small amount of] CPU
     // here.
-    ArrayUtil.introSort(fields, 0, fieldCount, fieldsComp);
+    ArrayUtil.introSort(fields, 0, fieldCount, fieldsComp);//对当前doc中出现的field进行排序
     for(int i=0;i<fieldCount;i++) {
       final DocFieldProcessorPerField perField = fields[i];
       perField.consumer.processFields(perField.fields, perField.fieldCount);
@@ -255,6 +255,7 @@ final class DocFieldProcessor extends DocConsumer {
     }
   }
 
+  //按照name排序field
   private static final Comparator<DocFieldProcessorPerField> fieldsComp = new Comparator<DocFieldProcessorPerField>() {
     @Override
     public int compare(DocFieldProcessorPerField o1, DocFieldProcessorPerField o2) {

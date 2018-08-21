@@ -129,6 +129,7 @@ public abstract class TokenStream extends AttributeSource implements Closeable {
    * the next token. Implementing classes must implement this method and update
    * the appropriate {@link AttributeImpl}s with the attributes of the next
    * token.
+   * 消费者获取下一个token,并且更新适当的token的属性信息
    * <P>
    * The producer must make no assumptions about the attributes after the method
    * has been returned: the caller may arbitrarily change it. If the producer
@@ -146,7 +147,7 @@ public abstract class TokenStream extends AttributeSource implements Closeable {
    * are not required to check for availability of attributes in
    * {@link #incrementToken()}.
    * 
-   * @return false for end of stream; true otherwise
+   * @return false for end of stream; true otherwise,false表示数据流已经结束,true表示还可以继续读取数据
    */
   public abstract boolean incrementToken() throws IOException;
   
@@ -155,6 +156,7 @@ public abstract class TokenStream extends AttributeSource implements Closeable {
    * consumed, after {@link #incrementToken()} returned <code>false</code>
    * (using the new <code>TokenStream</code> API). Streams implementing the old API
    * should upgrade to use this feature.
+   * 该方法调用时间点是,incrementToken方法返回false之后,即最后的一个token被消费之后调用该方法
    * <p/>
    * This method can be used to perform any end-of-stream operations, such as
    * setting the final offset of a stream. The final offset of a stream might
@@ -179,6 +181,7 @@ public abstract class TokenStream extends AttributeSource implements Closeable {
   /**
    * This method is called by a consumer before it begins consumption using
    * {@link #incrementToken()}.
+   * 该方法在消费incrementToken方法前,可以调用被重新处理
    * <p>
    * Resets this stream to a clean state. Stateful implementations must implement
    * this method so that they can be reused, just as if they had been created fresh.
@@ -190,6 +193,7 @@ public abstract class TokenStream extends AttributeSource implements Closeable {
   public void reset() throws IOException {}
   
   /** Releases resources associated with this stream.
+   * 关闭流资源
    * <p>
    * If you override this method, always call {@code super.close()}, otherwise
    * some internal state will not be correctly reset (e.g., {@link Tokenizer} will

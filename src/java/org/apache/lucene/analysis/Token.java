@@ -40,6 +40,7 @@ import org.apache.lucene.util.BytesRef;
   its source text, e.g., to display highlighted query terms in a document
   browser, or to show matching text fragments in a <abbr title="KeyWord In Context">KWIC</abbr>
   display, etc.
+  start和end offset 作用是允许应用可以重新让一个token联系到原始text文本,比如展示高亮查询
   <p>
   The type is a string, assigned by a lexical analyzer
   (a.k.a. tokenizer), naming the lexical or syntactic class that the token
@@ -118,6 +119,7 @@ import org.apache.lucene.util.BytesRef;
   {@link CharSequence} interface introduced by the interface {@link org.apache.lucene.analysis.tokenattributes.CharTermAttribute}.
   This method now only prints the term text, no additional information anymore.
   </p>
+  表示一个token词,该词的内容以及一些属性信息
 */
 public class Token extends CharTermAttributeImpl 
                    implements TypeAttribute, PositionIncrementAttribute,
@@ -181,7 +183,7 @@ public class Token extends CharTermAttributeImpl
    */
   public Token(String text, int start, int end) {
     checkOffsets(start, end);
-    append(text);
+    append(text);//设置具体的token的内容
     startOffset = start;
     endOffset = end;
   }
@@ -226,14 +228,14 @@ public class Token extends CharTermAttributeImpl
    *  & length), start and end
    *  offsets
    * @param startTermBuffer buffer containing term text
-   * @param termBufferOffset the index in the buffer of the first character
-   * @param termBufferLength number of valid characters in the buffer
+   * @param termBufferOffset the index in the buffer of the first character ,token的具体内容
+   * @param termBufferLength number of valid characters in the buffer ,token的具体内容
    * @param start start offset in the source text
    * @param end end offset in the source text
    */
   public Token(char[] startTermBuffer, int termBufferOffset, int termBufferLength, int start, int end) {
     checkOffsets(start, end);
-    copyBuffer(startTermBuffer, termBufferOffset, termBufferLength);
+    copyBuffer(startTermBuffer, termBufferOffset, termBufferLength);//设置token的内容
     startOffset = start;
     endOffset = end;
   }
@@ -525,7 +527,7 @@ public class Token extends CharTermAttributeImpl
   public Token reinit(String newTerm, int newTermOffset, int newTermLength, int newStartOffset, int newEndOffset) {
     checkOffsets(newStartOffset, newEndOffset);
     clear();
-    append(newTerm, newTermOffset, newTermOffset + newTermLength);
+    append(newTerm, newTermOffset, newTermOffset + newTermLength);//token具体内容
     startOffset = newStartOffset;
     endOffset = newEndOffset;
     type = DEFAULT_TYPE;
@@ -549,7 +551,7 @@ public class Token extends CharTermAttributeImpl
   /**
    * Copy the prototype token's fields into this one, with a different term. Note: Payloads are shared.
    * @param prototype existing Token
-   * @param newTerm new term text
+   * @param newTerm new term text 新的token具体内容
    */
   public void reinit(Token prototype, String newTerm) {
     setEmpty().append(newTerm);
@@ -564,9 +566,9 @@ public class Token extends CharTermAttributeImpl
   /**
    * Copy the prototype token's fields into this one, with a different term. Note: Payloads are shared.
    * @param prototype existing Token
-   * @param newTermBuffer buffer containing new term text
-   * @param offset the index in the buffer of the first character
-   * @param length number of valid characters in the buffer
+   * @param newTermBuffer buffer containing new term text,token具体内容
+   * @param offset the index in the buffer of the first character,token具体内容
+   * @param length number of valid characters in the buffer,token具体内容
    */
   public void reinit(Token prototype, char[] newTermBuffer, int offset, int length) {
     copyBuffer(newTermBuffer, offset, length);

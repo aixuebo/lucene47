@@ -43,9 +43,9 @@ public abstract class DataInput implements Cloneable {
   public abstract byte readByte() throws IOException;
 
   /** Reads a specified number of bytes into an array at the specified offset.
-   * @param b the array to read bytes into
-   * @param offset the offset in the array to start storing bytes
-   * @param len the number of bytes to read
+   * @param b the array to read bytes into 存储字节到该数组里面
+   * @param offset the offset in the array to start storing bytes 
+   * @param len the number of bytes to read 要读取的长度
    * @see DataOutput#writeBytes(byte[],int)
    */
   public abstract void readBytes(byte[] b, int offset, int len)

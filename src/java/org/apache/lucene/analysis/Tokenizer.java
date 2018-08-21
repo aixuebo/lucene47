@@ -30,7 +30,7 @@ import java.io.IOException;
   call {@link AttributeSource#clearAttributes()} before
   setting attributes.
  */
-public abstract class Tokenizer extends TokenStream {  
+public abstract class Tokenizer extends TokenStream {
   /** The text source for this Tokenizer. */
   protected Reader input = ILLEGAL_STATE_READER;
   
@@ -71,9 +71,11 @@ public abstract class Tokenizer extends TokenStream {
   
   /** Return the corrected offset. If {@link #input} is a {@link CharFilter} subclass
    * this method calls {@link CharFilter#correctOffset}, else returns <code>currentOff</code>.
+   * 返回矫正后的偏移量
    * @param currentOff offset as seen in the output
    * @return corrected offset based on the input
    * @see CharFilter#correctOffset
+   * 校正偏移
    */
   protected final int correctOffset(int currentOff) {
     return (input instanceof CharFilter) ? ((CharFilter) input).correctOffset(currentOff) : currentOff;
@@ -92,11 +94,12 @@ public abstract class Tokenizer extends TokenStream {
     assert setReaderTestPoint();
   }
   
+  //重新读,即input指向开始的输入流
   @Override
   public void reset() throws IOException {
     super.reset();
     input = inputPending;
-    inputPending = ILLEGAL_STATE_READER;
+    inputPending = ILLEGAL_STATE_READER;//开始等待的变成错误的输入流
   }
 
   // only used by assert, for testing

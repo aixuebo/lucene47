@@ -19,9 +19,10 @@ package org.apache.lucene.index;
 
 import java.io.IOException;
 
+//如何消费一个document
 abstract class DocConsumer {
-  abstract void processDocument(FieldInfos.Builder fieldInfos) throws IOException;
-  abstract void finishDocument() throws IOException;
+  abstract void processDocument(FieldInfos.Builder fieldInfos) throws IOException;//处理文档,参数是文档对应的field集合
+  abstract void finishDocument() throws IOException;//文档完成
   abstract void flush(final SegmentWriteState state) throws IOException;
   abstract void abort();
 }

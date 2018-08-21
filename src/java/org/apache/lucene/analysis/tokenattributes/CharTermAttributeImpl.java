@@ -26,7 +26,9 @@ import org.apache.lucene.util.AttributeReflector;
 import org.apache.lucene.util.RamUsageEstimator;
 import org.apache.lucene.util.UnicodeUtil;
 
-/** Default implementation of {@link CharTermAttribute}. */
+/** Default implementation of {@link CharTermAttribute}.
+ * 用于存储具体的token的文本内容
+ **/
 public class CharTermAttributeImpl extends AttributeImpl implements CharTermAttribute, TermToBytesRefAttribute, Cloneable {
   private static int MIN_BUFFER_SIZE = 10;
   

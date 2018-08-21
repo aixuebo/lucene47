@@ -77,8 +77,8 @@ final class TermVectorsConsumer extends TermsHashConsumer {
   /** Fills in no-term-vectors for all docs we haven't seen
    *  since the last doc that had term vectors. */
   void fill(int docID) throws IOException {
-    while(lastDocID < docID) {
-      writer.startDocument(0);
+    while(lastDocID < docID) {//追加lastDocID和docID之间的doc
+      writer.startDocument(0);//没有field
       writer.finishDocument();
       lastDocID++;
     }

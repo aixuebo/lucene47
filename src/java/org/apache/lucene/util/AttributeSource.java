@@ -36,6 +36,7 @@ import org.apache.lucene.analysis.TokenStream; // for javadocs
  * the {@link #addAttribute(Class)}, which then checks if an instance of
  * that type is already present. If yes, it returns the instance, otherwise
  * it creates a new instance and returns it.
+ * 该类表示包含一组不同的属性集合,因此有方法去添加属性 以及 获取属性
  */
 public class AttributeSource {
   /**
@@ -44,6 +45,7 @@ public class AttributeSource {
   public static abstract class AttributeFactory {
     /**
      * returns an {@link AttributeImpl} for the supplied {@link Attribute} interface class.
+     * 返回该接口对应的实现类
      */
     public abstract AttributeImpl createAttributeInstance(Class<? extends Attribute> attClass);
     
@@ -53,6 +55,7 @@ public class AttributeSource {
      */
     public static final AttributeFactory DEFAULT_ATTRIBUTE_FACTORY = new DefaultAttributeFactory();
     
+    //默认实现方式
     private static final class DefaultAttributeFactory extends AttributeFactory {
       private static final WeakIdentityMap<Class<? extends Attribute>, WeakReference<Class<? extends AttributeImpl>>> attClassImplMap =
         WeakIdentityMap.newConcurrentHashMap(false);
@@ -70,6 +73,7 @@ public class AttributeSource {
         }
       }
       
+      //找到接口Impl的类就是实现类即可
       private static Class<? extends AttributeImpl> getClassForInterface(Class<? extends Attribute> attClass) {
         final WeakReference<Class<? extends AttributeImpl>> ref = attClassImplMap.get(attClass);
         Class<? extends AttributeImpl> clazz = (ref == null) ? null : ref.get();
@@ -95,6 +99,7 @@ public class AttributeSource {
    * This class holds the state of an AttributeSource.
    * @see #captureState
    * @see #restoreState
+   * 该类持有一个属性实例,以及映射下一个属性实例,这样保持一个链表
    */
   public static final class State implements Cloneable {
     AttributeImpl attribute;
@@ -115,8 +120,8 @@ public class AttributeSource {
     
   // These two maps must always be in sync!!!
   // So they are private, final and read-only from the outside (read-only iterators)
-  private final Map<Class<? extends Attribute>, AttributeImpl> attributes;
-  private final Map<Class<? extends AttributeImpl>, AttributeImpl> attributeImpls;
+  private final Map<Class<? extends Attribute>, AttributeImpl> attributes;//属性接口class与属性实现实例的映射
+  private final Map<Class<? extends AttributeImpl>, AttributeImpl> attributeImpls;//实现类class与实例的映射
   private final State[] currentState;
 
   private final AttributeFactory factory;
@@ -168,6 +173,7 @@ public class AttributeSource {
   /** Returns a new iterator that iterates all unique Attribute implementations.
    * This iterator may contain less entries that {@link #getAttributeClassesIterator},
    * if one instance implements more than one Attribute interface.
+   * 迭代每一个属性实现类
    */
   public final Iterator<AttributeImpl> getAttributeImplsIterator() {
     final State initState = getCurrentState();
@@ -199,10 +205,15 @@ public class AttributeSource {
     }
   }
   
-  /** a cache that stores all interfaces for known implementation classes for performance (slow reflection) */
+  /** a cache that stores all interfaces for known implementation classes for performance (slow reflection)
+   * 缓存 所有的接口 对应的实现类实例
+   * 因为一个接口可能实现了多个属性实现类 
+   * key是属性实现类,value是该实现类实现了哪些属性接口
+   **/
   private static final WeakIdentityMap<Class<? extends AttributeImpl>,LinkedList<WeakReference<Class<? extends Attribute>>>> knownImplClasses =
     WeakIdentityMap.newConcurrentHashMap(false);
   
+  //参数是一个具体的 属性实现类
   static LinkedList<WeakReference<Class<? extends Attribute>>> getAttributeInterfaces(final Class<? extends AttributeImpl> clazz) {
     LinkedList<WeakReference<Class<? extends Attribute>>> foundInterfaces = knownImplClasses.get(clazz);
     if (foundInterfaces == null) {
@@ -212,12 +223,13 @@ public class AttributeSource {
       // and that extend the Attribute interface
       Class<?> actClazz = clazz;
       do {
-        for (Class<?> curInterface : actClazz.getInterfaces()) {
+        for (Class<?> curInterface : actClazz.getInterfaces()) {//获取该属性实现类的实现的所有接口
           if (curInterface != Attribute.class && Attribute.class.isAssignableFrom(curInterface)) {
+        	  //添加该实现类实现了哪些属性接口
             foundInterfaces.add(new WeakReference<Class<? extends Attribute>>(curInterface.asSubclass(Attribute.class)));
           }
         }
-        actClazz = actClazz.getSuperclass();
+        actClazz = actClazz.getSuperclass();//继续爷爷辈的递归查找
       } while (actClazz != null);
       knownImplClasses.put(clazz, foundInterfaces);
     }
@@ -234,21 +246,21 @@ public class AttributeSource {
    */
   public final void addAttributeImpl(final AttributeImpl att) {
     final Class<? extends AttributeImpl> clazz = att.getClass();
-    if (attributeImpls.containsKey(clazz)) return;
+    if (attributeImpls.containsKey(clazz)) return;//说明已经有该实现类的实例了
     final LinkedList<WeakReference<Class<? extends Attribute>>> foundInterfaces =
-      getAttributeInterfaces(clazz);
+      getAttributeInterfaces(clazz);//获取该实现类实现了哪些接口
     
     // add all interfaces of this AttributeImpl to the maps
-    for (WeakReference<Class<? extends Attribute>> curInterfaceRef : foundInterfaces) {
-      final Class<? extends Attribute> curInterface = curInterfaceRef.get();
+    for (WeakReference<Class<? extends Attribute>> curInterfaceRef : foundInterfaces) {//循环每一个实现的属性接口
+      final Class<? extends Attribute> curInterface = curInterfaceRef.get();//具体接口
       assert (curInterface != null) :
         "We have a strong reference on the class holding the interfaces, so they should never get evicted";
       // Attribute is a superclass of this interface
-      if (!attributes.containsKey(curInterface)) {
+      if (!attributes.containsKey(curInterface)) {//说明目前没有该属性接口
         // invalidate state to force recomputation in captureState()
         this.currentState[0] = null;
-        attributes.put(curInterface, att);
-        attributeImpls.put(clazz, att);
+        attributes.put(curInterface, att);//属性接口 与 实现类实例的映射
+        attributeImpls.put(clazz, att);//实现类class与实例的映射
       }
     }
   }
@@ -258,6 +270,7 @@ public class AttributeSource {
    * This method first checks if an instance of that class is 
    * already in this AttributeSource and returns it. Otherwise a
    * new instance is created, added to this AttributeSource and returned. 
+   * 添加一个属性,返回对应的实现类,如果已经存在了,直接返回实现类即可
    */
   public final <T extends Attribute> T addAttribute(Class<T> attClass) {
     AttributeImpl attImpl = attributes.get(attClass);
@@ -268,12 +281,14 @@ public class AttributeSource {
           attClass.getName() + " does not fulfil this contract."
         );
       }
-      addAttributeImpl(attImpl = this.factory.createAttributeInstance(attClass));
+      addAttributeImpl(attImpl = this.factory.createAttributeInstance(attClass));//创建该接口对应的实现类
     }
     return attClass.cast(attImpl);
   }
   
-  /** Returns true, iff this AttributeSource has any attributes */
+  /** Returns true, iff this AttributeSource has any attributes
+   * 是否有属性 
+   **/
   public final boolean hasAttributes() {
     return !this.attributes.isEmpty();
   }
@@ -281,6 +296,7 @@ public class AttributeSource {
   /**
    * The caller must pass in a Class&lt;? extends Attribute&gt; value. 
    * Returns true, iff this AttributeSource contains the passed-in Attribute.
+   * 确定是否包含该属性
    */
   public final boolean hasAttribute(Class<? extends Attribute> attClass) {
     return this.attributes.containsKey(attClass);
@@ -296,6 +312,7 @@ public class AttributeSource {
    *         a specific Attribute. {@link #addAttribute} will automatically make the attribute
    *         available. If you want to only use the attribute, if it is available (to optimize
    *         consuming), use {@link #hasAttribute}.
+   *  返回参数Attribute对应的AttributeImpl实现类
    */
   public final <T extends Attribute> T getAttribute(Class<T> attClass) {
     AttributeImpl attImpl = attributes.get(attClass);
@@ -304,16 +321,17 @@ public class AttributeSource {
     }
     return attClass.cast(attImpl);
   }
-    
+  
+  //将当前持有的所有属性实现类的状态赋予给State对象
   private State getCurrentState() {
     State s  = currentState[0];
-    if (s != null || !hasAttributes()) {
+    if (s != null || !hasAttributes()) {//说明没有属性,直接返回即可
       return s;
     }
     State c = s = currentState[0] = new State();
-    final Iterator<AttributeImpl> it = attributeImpls.values().iterator();
+    final Iterator<AttributeImpl> it = attributeImpls.values().iterator();//迭代每一个属性实现类
     c.attribute = it.next();
-    while (it.hasNext()) {
+    while (it.hasNext()) {//下一个属性实现类
       c.next = new State();
       c = c.next;
       c.attribute = it.next();
@@ -324,6 +342,7 @@ public class AttributeSource {
   /**
    * Resets all Attributes in this AttributeSource by calling
    * {@link AttributeImpl#clear()} on each Attribute implementation.
+   * 让每一个属性都清空
    */
   public final void clearAttributes() {
     for (State state = getCurrentState(); state != null; state = state.next) {
@@ -334,6 +353,7 @@ public class AttributeSource {
   /**
    * Captures the state of all Attributes. The return value can be passed to
    * {@link #restoreState} to restore the state of this or another AttributeSource.
+   * 获取当前token的所有属性链表队列
    */
   public final State captureState() {
     final State state = this.getCurrentState();
@@ -353,13 +373,14 @@ public class AttributeSource {
    * the targetStream contains an OffsetAttribute, but this state doesn't, then
    * the value of the OffsetAttribute remains unchanged. It might be desirable to
    * reset its value to the default, in which case the caller should first
-   * call {@link TokenStream#clearAttributes()} on the targetStream.   
+   * call {@link TokenStream#clearAttributes()} on the targetStream.  
+   * 还原此时属性对应的内容 
    */
   public final void restoreState(State state) {
     if (state == null)  return;
     
     do {
-      AttributeImpl targetImpl = attributeImpls.get(state.attribute.getClass());
+      AttributeImpl targetImpl = attributeImpls.get(state.attribute.getClass());//获取该属性对应的实现类实例
       if (targetImpl == null) {
         throw new IllegalArgumentException("State contains AttributeImpl of type " +
           state.attribute.getClass().getName() + " that is not in in this AttributeSource");

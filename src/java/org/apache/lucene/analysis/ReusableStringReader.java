@@ -21,7 +21,7 @@ import java.io.Reader;
 
 /** Internal class to enable reuse of the string reader by {@link Analyzer#tokenStream(String,String)} */
 final class ReusableStringReader extends Reader {
-  private int pos = 0, size = 0;
+  private int pos = 0, size = 0;//读取到字符串s的哪个位置了  以及 s的总长度
   private String s = null;
   
   void setValue(String s) {
@@ -30,6 +30,7 @@ final class ReusableStringReader extends Reader {
     this.pos = 0;
   }
   
+  //读取一个字节
   @Override
   public int read() {
     if (pos < size) {
@@ -40,6 +41,7 @@ final class ReusableStringReader extends Reader {
     }
   }
   
+  //读取s字符串的内容，到c字节数组中,从off的位置开始覆盖c字节数组内容，读取s字符串中len个长度
   @Override
   public int read(char[] c, int off, int len) {
     if (pos < size) {

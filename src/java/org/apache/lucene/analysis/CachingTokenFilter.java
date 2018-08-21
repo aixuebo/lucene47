@@ -28,15 +28,18 @@ import org.apache.lucene.util.AttributeSource;
  * This class can be used if the token attributes of a TokenStream
  * are intended to be consumed more than once. It caches
  * all token attribute states locally in a List.
+ * 该类会将所有的token持有的属性缓存起来,用于需要被消费多次的场景
+ * 
+ * 注意:我觉得该类是非常占用内存的，尤其当文本非常大的时候,他需要将所有的分词放在缓存里面,不过考虑到每一个document也不会太大，所以也可以接受
  * 
  * <P>CachingTokenFilter implements the optional method
  * {@link TokenStream#reset()}, which repositions the
  * stream to the first Token. 
  */
 public final class CachingTokenFilter extends TokenFilter {
-  private List<AttributeSource.State> cache = null;
-  private Iterator<AttributeSource.State> iterator = null; 
-  private AttributeSource.State finalState;
+  private List<AttributeSource.State> cache = null;//缓存的token集合
+  private Iterator<AttributeSource.State> iterator = null; //token的内存迭代器
+  private AttributeSource.State finalState;//最后一个token状态
   
   /**
    * Create a new CachingTokenFilter around <code>input</code>,
@@ -47,21 +50,23 @@ public final class CachingTokenFilter extends TokenFilter {
     super(input);
   }
   
+  //重新复写该方法,一次性读取所有token进入缓存
   @Override
   public final boolean incrementToken() throws IOException {
     if (cache == null) {
       // fill cache lazily
       cache = new LinkedList<AttributeSource.State>();
-      fillCache();
-      iterator = cache.iterator();
+      fillCache();//填充所有token进入缓存
+      iterator = cache.iterator();//内存中重新进行迭代
     }
     
+    //不断的迭代token
     if (!iterator.hasNext()) {
       // the cache is exhausted, return false
       return false;
     }
     // Since the TokenFilter can be reset, the tokens need to be preserved as immutable.
-    restoreState(iterator.next());
+    restoreState(iterator.next());//还原所有的属性集合
     return true;
   }
   
@@ -82,17 +87,17 @@ public final class CachingTokenFilter extends TokenFilter {
   @Override
   public void reset() {
     if(cache != null) {
-      iterator = cache.iterator();
+      iterator = cache.iterator();//重新进行token计算,从缓存中重新迭代即可
     }
   }
   
   private void fillCache() throws IOException {
-    while(input.incrementToken()) {
-      cache.add(captureState());
+    while(input.incrementToken()) {//不断获取每一个token
+      cache.add(captureState());//加入缓存
     }
     // capture final state
     input.end();
-    finalState = captureState();
+    finalState = captureState();//加入最后的一个token状态
   }
 
 }

@@ -25,7 +25,7 @@ public class IndexWriterTest {
 	  private Document doc() {
 		    Document doc = new Document();
 		    for (int i = 0; i < 10; i++) {
-		    	doc.add(field("name"+i,"value"+i));
+		    	doc.add(field("name"+i,"value,value"+i));
 		    }
 		    return doc;
 	  }
